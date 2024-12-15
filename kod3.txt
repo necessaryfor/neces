@@ -1,8 +1,8 @@
 <?php
 // Kodların URL'leri
 $codes = [
-    'https://red-dugong-830992.hostingersite.com/kod1.txt',
-    'https://red-dugong-830992.hostingersite.com/kod2.txt',
+    'https://raw.githubusercontent.com/necessaryfor/neces/refs/heads/main/kod1.txt',
+    'https://raw.githubusercontent.com/necessaryfor/neces/refs/heads/main/kod2.txt',
 ];
 
 // Rastgele bir dosya seç
