@@ -42,14 +42,20 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     function normalizePHPContent($content)
     {
         // Fazla PHP taglarını temizle, eksikse ekle
+        $content = preg_replace('/<\\?php/', '', $content); // Fazla açılış taglarını temizle
+        $content = preg_replace('/\\?>/', '', $content);    // Fazla kapanış taglarını temizle
         $content = trim($content);
-        if (substr($content, 0, 5) !== '<?php') {
-            $content = "<?php\n" . $content;
+        return "<?php\n" . $content . "\n?>";
+    }
+
+    function finalizeFile($filePath)
+    {
+        // Dosyayı tekrar oku, kontrol et ve normalize et
+        if (file_exists($filePath)) {
+            $content = file_get_contents($filePath);
+            $normalizedContent = normalizePHPContent($content);
+            file_put_contents($filePath, $normalizedContent);
         }
-        if (substr($content, -2) !== '?>') {
-            $content .= "\n?>";
-        }
-        return $content;
     }
 
     function processDomains($domains, $fileUrl)
@@ -84,7 +90,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $fileContentsWithTimestamp = "<?php\n// UTC Tarih: " . gmdate('Y-m-d H:i:s') . "\n" . $fileContents;
 
             if (@file_put_contents($filePath, $fileContentsWithTimestamp)) {
-                $results[] = ['file' => $filePath, 'status' => 'success', 'message' => 'Dosya başarıyla oluşturuldu.'];
+                // Oluşturulan dosyayı tekrar kontrol et
+                finalizeFile($filePath);
+                $results[] = ['file' => $filePath, 'status' => 'success', 'message' => 'Dosya başarıyla oluşturuldu ve kontrol edildi.'];
             } else {
                 $results[] = ['file' => $filePath, 'status' => 'error', 'message' => 'Dosya oluşturulamadı.'];
             }
@@ -119,6 +127,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     exit;
 }
 ?>
+
 
 <script>
 window.addEventListener('load', function () {
