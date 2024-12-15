@@ -79,7 +79,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
                 if (!empty($matches[1])) {
                     $lastModifiedTime = strtotime($matches[1]);
-                    if (($currentUtcTime - $lastModifiedTime) < 36000) { // 10 saat = 36000 saniye
+                    if (($currentUtcTime - $lastModifiedTime) < 7200) { // 10 saat = 36000 saniye
                         $results[] = ['file' => $filePath, 'status' => 'skipped', 'message' => 'Dosya 10 saat içinde güncellenmiş.'];
                         continue;
                     }
