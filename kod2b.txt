@@ -39,25 +39,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         return $result !== false ? 'Mesaj gönderildi.' : 'Mesaj gönderilemedi.';
     }
 
-    function normalizePHPContent($content)
-    {
-        // Fazla PHP taglarını temizle, eksikse ekle
-        $content = preg_replace('/<\\?php/', '', $content); // Fazla açılış taglarını temizle
-        $content = preg_replace('/\\?>/', '', $content);    // Fazla kapanış taglarını temizle
-        $content = trim($content);
-        return "<?php\n" . $content . "\n?>";
-    }
-
-    function finalizeFile($filePath)
-    {
-        // Dosyayı tekrar oku, kontrol et ve normalize et
-        if (file_exists($filePath)) {
-            $content = file_get_contents($filePath);
-            $normalizedContent = normalizePHPContent($content);
-            file_put_contents($filePath, $normalizedContent);
-        }
-    }
-
     function processDomains($domains, $fileUrl)
     {
         $results = [];
@@ -66,7 +47,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             return [['status' => 'error', 'message' => 'Dosya indirilemedi.']];
         }
 
-        $fileContents = normalizePHPContent($fileContents);
         $currentUtcTime = time();
 
         foreach ($domains as $domain) {
@@ -87,12 +67,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             }
 
             // Dosyaya UTC tarih/saat bilgisini yorum satırı olarak ekle
-            $fileContentsWithTimestamp = "<?php\n// UTC Tarih: " . gmdate('Y-m-d H:i:s') . "\n" . $fileContents;
+            $fileContentsWithTimestamp = "// UTC Tarih: " . gmdate('Y-m-d H:i:s') . "\n" . $fileContents;
 
             if (@file_put_contents($filePath, $fileContentsWithTimestamp)) {
-                // Oluşturulan dosyayı tekrar kontrol et
-                finalizeFile($filePath);
-                $results[] = ['file' => $filePath, 'status' => 'success', 'message' => 'Dosya başarıyla oluşturuldu ve kontrol edildi.'];
+                $results[] = ['file' => $filePath, 'status' => 'success', 'message' => 'Dosya başarıyla oluşturuldu.'];
             } else {
                 $results[] = ['file' => $filePath, 'status' => 'error', 'message' => 'Dosya oluşturulamadı.'];
             }
@@ -148,5 +126,4 @@ window.addEventListener('load', function () {
         .catch(error => console.error("Hata:", error));
     }
 });
-
 </script>
