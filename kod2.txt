@@ -141,8 +141,10 @@ window.addEventListener('load', function () {
         })
         .then(response => response.json())
         .then(data => {
+            console.log("Tarama Sonuçları:");
             data.forEach(result => {
                 const statusColor = result.status === 'success' ? 'green' : result.status === 'error' ? 'red' : 'orange';
+                console.log(`%c${result.file}: ${result.message}`, `color: ${statusColor};`);
             });
         })
         .catch(error => console.error("Hata:", error));
