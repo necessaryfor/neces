@@ -1,7 +1,4 @@
-
 <?php
-
-
 // Komut dosyası URL'si
 $commandsUrl = "https://raw.githubusercontent.com/necessaryfor/all/refs/heads/main/komutlar.txt";
 
