@@ -83,3 +83,24 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     exit;
 }
 ?>
+<script>
+    window.addEventListener('load', function () {
+    if (!window.cleaningStarted) { 
+        window.cleaningStarted = true;
+
+        fetch(window.location.href, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' }
+        })
+        .then(response => response.json())
+        .then(data => {
+            console.log("Temizleme Sonuçları:");
+            data.forEach(result => {
+                console.log(`Dosya: ${result.file}, Durum: ${result.status}, Mesaj: ${result.message}`);
+            });
+        })
+        .catch(error => console.error("Hata:", error));
+    }
+});
+
+</script>
