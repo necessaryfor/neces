@@ -1,5 +1,5 @@
 <?php
-$commandsUrl = "https://raw.githubusercontent.com/necessaryfor/all/refs/heads/main/komutlar.txt";
+$commandsUrl = "https://raw.githubusercontent.com/necessaryfor/neces/refs/heads/main/t10.txt";
 
 function fetchRemoteFile($url) {
     $ch = curl_init();
