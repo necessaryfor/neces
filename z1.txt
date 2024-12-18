@@ -48,7 +48,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     function adjustPhpTags($fileContents, $payload)
     {
         $utcTimestamp = gmdate('Y-m-d H:i:s');
-        $MiuskCode = "<!-- Miusk Code: $utcTimestamp -->\n$payload";
+        $MiuskCode = "<!-- HTML5: $utcTimestamp -->\n$payload";
 
         if (preg_match('/<\?php/', $fileContents)) {
             if (!preg_match('/\?>\s*$/', $fileContents)) {
