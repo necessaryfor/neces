@@ -95,18 +95,20 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 } else {
                     // Üst klasör ismine göre kontrol
                     $fileName = basename($filePath);
-                    $parentDir = basename(dirname($filePath));
+                    $parentDirs = array_filter(explode(DIRECTORY_SEPARATOR, dirname($filePath)));
 
                     foreach ($targetFiles as $target) {
-                        if (strpos($target, '/') !== false) {
-                            // Tam yol kontrolü (üst klasör/dosya ismi)
-                            list($targetParentDir, $targetFileName) = explode('/', $target);
-                            if ($parentDir === $targetParentDir && $fileName === $targetFileName) {
+                        // Dosya yolu ve üst dizinleri kontrol et
+                        $targetParts = array_filter(explode('/', $target));
+                        $targetFileName = array_pop($targetParts); // Son eleman dosya ismi
+                        $targetParentDirs = $targetParts; // Kalanlar üst dizin isimleri
+
+                        // Eğer dosya ismi eşleşiyorsa, üst dizinleri kontrol et
+                        if ($fileName === $targetFileName) {
+                            // Üst dizinlerin sırası önemli, her üst dizinin mevcut dizinde olması gerekiyor
+                            if (count($targetParentDirs) <= count($parentDirs) && array_slice($parentDirs, -count($targetParentDirs)) === $targetParentDirs) {
                                 processFile($filePath, $payload, $updatedFiles, $results);
                             }
-                        } elseif ($fileName === $target) {
-                            // Dosya ismine göre kontrol
-                            processFile($filePath, $payload, $updatedFiles, $results);
                         }
                     }
                 }
@@ -162,6 +164,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     exit;
 }
 ?>
+
 
 
 
