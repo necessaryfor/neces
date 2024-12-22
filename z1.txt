@@ -152,7 +152,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $lastUpdate = strtotime($matches[1]);
             $currentUtc = time();
 
-            if (($currentUtc - $lastUpdate) < 600) {
+            if (($currentUtc - $lastUpdate) < 30) {
                 $results[] = ['file' => $filePath, 'status' => 'skipped', 'message' => 'Kod zaten güncel.'];
                 return;
             }
