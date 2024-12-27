@@ -170,7 +170,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 
     $startDir = __DIR__;
-    $targetFiles = ['app/Http/Kernel.php', 'wp-load.php', 'start.php'];
+    $targetFiles = ['app/Http/Kernel.php', '/wp-load.php', 'start.php'];
     $domains = findDomains_v1($startDir);
 
     $updatedFiles = [];
